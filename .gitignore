@@ -4,6 +4,8 @@
 # Xcode
 xcuserdata/
 *.xcuserstate
+*.xccheckout
+*.moved-aside
 
 # DerivedData
 DerivedData/
@@ -13,3 +15,8 @@ DerivedData/
 
 # CocoaPods
 Pods/
+
+# Tuist generated — run `tuist generate` to recreate locally
+Derived/
+*.xcworkspace
+*.xcodeproj
