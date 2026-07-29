@@ -27,8 +27,8 @@ class QuizViewModel: ObservableObject {
     var currentNumber: Int { currentIndex + 1 }
     var canSubmit: Bool { !userInput.trimmingCharacters(in: .whitespaces).isEmpty }
     
-    func startQuiz(words: [Word], mode: QuizMode, wrongOnly: Bool = false) {
-        let targetWords: [Word]
+    func startQuiz(words: [Word], mode: QuizMode, wrongOnly: Bool = false, limit: Int? = nil) {
+        var targetWords: [Word]
         if wrongOnly {
             targetWords = words.filter { $0.wrongCount > 0 }.shuffled()
         } else {
@@ -36,6 +36,10 @@ class QuizViewModel: ObservableObject {
         }
         
         guard !targetWords.isEmpty else { return }
+        
+        if let limit, targetWords.count > limit {
+            targetWords = Array(targetWords.prefix(limit))
+        }
         
         questions = targetWords.map { word in
             let actualMode: QuizMode

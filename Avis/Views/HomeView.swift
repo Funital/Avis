@@ -32,6 +32,7 @@ struct HomeView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("영단어 퀴즈")
             .navigationBarTitleDisplayMode(.large)
+            .onAppear { statsVM.load() }
         }
     }
     
@@ -103,12 +104,12 @@ struct HomeView: View {
             
             HStack(spacing: 12) {
                 quickStartButton(
-                    title: "전체 퀴즈",
-                    subtitle: "\(wordListVM.words.count)개 단어",
+                    title: "데일리 퀴즈",
+                    subtitle: "랜덤 10문제",
                     icon: "play.fill",
                     gradient: [.indigo, .purple]
                 ) {
-                    quizVM.startQuiz(words: wordListVM.words, mode: .mixed)
+                    quizVM.startQuiz(words: wordListVM.words, mode: .mixed, limit: 10)
                     navigateToQuiz = true
                 }
                 
@@ -255,13 +256,12 @@ struct StudyDayView: DayView {
                     .foregroundColor(isToday() ? .indigo : (isPast() ? .primary : .secondary))
                 
                 if hasStudied {
-                    Circle()
-                        .fill(Color.indigo)
-                        .frame(width: 6, height: 6)
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.green)
                 } else {
-                    Circle()
-                        .fill(Color.clear)
-                        .frame(width: 6, height: 6)
+                    Color.clear
+                        .frame(width: 10, height: 10)
                 }
             }
         )
