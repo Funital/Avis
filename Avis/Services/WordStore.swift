@@ -1244,6 +1244,7 @@ struct QuizStats: Codable {
     var totalWrong: Int = 0
     var bestScore: Double = 0
     var lastPlayedDate: Date?
+    var studyDates: [String] = []
     
     var totalQuestions: Int { totalCorrect + totalWrong }
     var overallAccuracy: Double {

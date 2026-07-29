@@ -95,6 +95,12 @@ class QuizViewModel: ObservableObject {
             let score = Double(correctCount) / Double(questions.count) * 100
             if score > stats.bestScore { stats.bestScore = score }
             stats.lastPlayedDate = Date()
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let today = formatter.string(from: Date())
+            if !stats.studyDates.contains(today) {
+                stats.studyDates.append(today)
+            }
             WordStore.saveStats(stats)
             
             quizState = .finished

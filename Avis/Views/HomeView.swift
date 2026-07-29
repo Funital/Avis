@@ -1,12 +1,13 @@
 import SwiftUI
-import UniformTypeIdentifiers
+import MijickCalendarView
 
 struct HomeView: View {
     @EnvironmentObject var wordListVM: WordListViewModel
     @EnvironmentObject var quizVM: QuizViewModel
-    @State private var showFilePicker = false
-    @State private var showReplaceAlert = false
-    @State private var pendingURL: URL?
+    @EnvironmentObject var statsVM: StatsViewModel
+    @State private var selectedDate: Date? = nil
+    @State private var displayedMonth: Date = Date()
+    @State private var navigateToQuiz = false
     
     private var learnedPercent: Double {
         guard !wordListVM.words.isEmpty else { return 0 }
@@ -23,56 +24,14 @@ struct HomeView: View {
                     // 빠른 시작
                     quickStartSection
                     
-                    // 엑셀 불러오기
-                    importSection
+                    // 학습 캘린더
+                    calendarSection
                 }
                 .padding()
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("영단어 퀴즈")
             .navigationBarTitleDisplayMode(.large)
-        }
-        .fileImporter(
-            isPresented: $showFilePicker,
-            allowedContentTypes: [UTType(filenameExtension: "xlsx") ?? .data],
-            allowsMultipleSelection: false
-        ) { result in
-            switch result {
-            case .success(let urls):
-                guard let url = urls.first else { return }
-                if wordListVM.words.isEmpty {
-                    wordListVM.importExcel(url: url)
-                } else {
-                    pendingURL = url
-                    showReplaceAlert = true
-                }
-            case .failure(let error):
-                wordListVM.importError = error.localizedDescription
-            }
-        }
-        .alert("단어 가져오기", isPresented: $showReplaceAlert) {
-            Button("추가하기") {
-                if let url = pendingURL { wordListVM.importExcel(url: url) }
-            }
-            Button("교체하기", role: .destructive) {
-                if let url = pendingURL { wordListVM.replaceAllWords(url: url) }
-            }
-            Button("취소", role: .cancel) {}
-        } message: {
-            Text("기존 단어장에 추가할까요, 아니면 전체 교체할까요?")
-        }
-        .alert("가져오기 완료", isPresented: $wordListVM.showImportSuccess) {
-            Button("확인") {}
-        } message: {
-            Text("단어 \(wordListVM.importedCount)개를 가져왔습니다!")
-        }
-        .alert("오류", isPresented: .init(
-            get: { wordListVM.importError != nil },
-            set: { if !$0 { wordListVM.importError = nil } }
-        )) {
-            Button("확인") { wordListVM.importError = nil }
-        } message: {
-            Text(wordListVM.importError ?? "")
         }
     }
     
@@ -149,8 +108,8 @@ struct HomeView: View {
                     icon: "play.fill",
                     gradient: [.indigo, .purple]
                 ) {
-                    quizVM.quizMode = .mixed
                     quizVM.startQuiz(words: wordListVM.words, mode: .mixed)
+                    navigateToQuiz = true
                 }
                 
                 quickStartButton(
@@ -160,86 +119,161 @@ struct HomeView: View {
                     gradient: [.orange, .red]
                 ) {
                     quizVM.startQuiz(words: wordListVM.words, mode: .mixed, wrongOnly: true)
+                    navigateToQuiz = true
                 }
             }
+            .navigationDestination(isPresented: $navigateToQuiz) {
+                QuizView()
+                    .environmentObject(quizVM)
+                    .environmentObject(wordListVM)
+            }
+        }
+    }
+    
+    private var monthYearString: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "yyyy년 M월"
+        return formatter.string(from: displayedMonth)
+    }
+    
+    private var calendarSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("학습 캘린더")
+                .font(.headline)
+                .padding(.leading, 4)
+            
+            VStack(spacing: 12) {
+                // 년월 헤더 + 좌우 버튼
+                HStack {
+                    Button {
+                        withAnimation {
+                            displayedMonth = Calendar.current.date(byAdding: .month, value: -1, to: displayedMonth) ?? displayedMonth
+                        }
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.body.weight(.semibold))
+                            .foregroundColor(.indigo)
+                    }
+                    
+                    Spacer()
+                    
+                    Text(monthYearString)
+                        .font(.headline)
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation {
+                            displayedMonth = Calendar.current.date(byAdding: .month, value: 1, to: displayedMonth) ?? displayedMonth
+                        }
+                    } label: {
+                        Image(systemName: "chevron.right")
+                            .font(.body.weight(.semibold))
+                            .foregroundColor(.indigo)
+                    }
+                }
+                .padding(.horizontal, 4)
+                
+                // 캘린더
+                let studyDates = Set(statsVM.stats.studyDates)
+                MCalendarView(selectedDate: $selectedDate, selectedRange: nil) {
+                    $0.dayView { date, isCurrentMonth, selectedDate, selectedRange in
+                        StudyDayView(
+                            date: date,
+                            isCurrentMonth: isCurrentMonth,
+                            selectedDate: selectedDate,
+                            selectedRange: selectedRange,
+                            studyDates: studyDates
+                        )
+                    }
+                    .monthLabel { date in EmptyMonthLabel(month: date) }
+                    .startMonth(displayedMonth)
+                    .endMonth(displayedMonth)
+                    .firstWeekday(.sunday)
+                    .locale(Locale(identifier: "ko_KR"))
+                }
+                .id(displayedMonth)
+                .frame(height: 300)
+            }
+            .padding(16)
+            .background(Color(.systemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
         }
     }
     
     private func quickStartButton(title: String, subtitle: String, icon: String, gradient: [Color], action: @escaping () -> Void) -> some View {
-        NavigationLink(destination: QuizView().environmentObject(quizVM).environmentObject(wordListVM)) {
-            Button(action: action) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Image(systemName: icon)
-                        .font(.title2)
-                        .foregroundColor(.white)
-                    Spacer()
-                    Text(title)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.8))
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
-                .frame(height: 110)
-                .background(
-                    LinearGradient(colors: gradient, startPoint: .topLeading, endPoint: .bottomTrailing)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 8) {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundColor(.white)
+                Spacer()
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.8))
             }
-            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
+            .frame(height: 110)
+            .background(
+                LinearGradient(colors: gradient, startPoint: .topLeading, endPoint: .bottomTrailing)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16))
         }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Custom DayView for Study Calendar
+struct StudyDayView: DayView {
+    let date: Date
+    let isCurrentMonth: Bool
+    let selectedDate: Binding<Date?>?
+    let selectedRange: Binding<MDateRange?>?
+    let studyDates: Set<String>
+    
+    private var dateString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
     }
     
-    private var importSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("엑셀 파일 불러오기")
-                .font(.headline)
-                .padding(.leading, 4)
-            
-            Button {
-                showFilePicker = true
-            } label: {
-                HStack(spacing: 16) {
-                    Image(systemName: "tablecells")
-                        .font(.title2)
-                        .foregroundColor(.indigo)
-                        .frame(width: 44, height: 44)
-                        .background(Color.indigo.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Excel 파일 가져오기")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                        Text("A열: 번호, B열: 영어, C~F열: 품사/뜻 형식의 .xlsx 파일")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    if wordListVM.isImporting {
-                        ProgressView()
-                    } else {
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.secondary)
-                            .font(.caption)
-                    }
+    private var hasStudied: Bool {
+        studyDates.contains(dateString)
+    }
+    
+    func createContent() -> AnyView {
+        AnyView(
+            VStack(spacing: 2) {
+                Text(getStringFromDay(format: "d"))
+                    .font(.system(size: 14, weight: isToday() ? .bold : .medium))
+                    .foregroundColor(isToday() ? .indigo : (isPast() ? .primary : .secondary))
+                
+                if hasStudied {
+                    Circle()
+                        .fill(Color.indigo)
+                        .frame(width: 6, height: 6)
+                } else {
+                    Circle()
+                        .fill(Color.clear)
+                        .frame(width: 6, height: 6)
                 }
-                .padding(16)
-                .background(Color(.systemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
             }
-            .disabled(wordListVM.isImporting)
-            
-            Text("💡 지원 형식: ①번호/영어/품사/뜻/품사/뜻 (6열) ②영어/한글 (2열)")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 4)
-        }
+        )
+    }
+    
+    func onSelection() {}
+}
+
+// MARK: - Empty Month Label (hidden, replaced by custom header)
+struct EmptyMonthLabel: MonthLabel {
+    let month: Date
+    func createContent() -> AnyView {
+        AnyView(EmptyView())
     }
 }

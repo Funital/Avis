@@ -13,6 +13,7 @@ struct ContentView: View {
                 }
                 .environmentObject(wordListVM)
                 .environmentObject(quizVM)
+                .environmentObject(statsVM)
             
             WordListView()
                 .tabItem {

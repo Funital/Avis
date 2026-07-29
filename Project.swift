@@ -2,6 +2,9 @@ import ProjectDescription
 
 let project = Project(
     name: "Avis",
+    packages: [
+        .remote(url: "https://github.com/Mijick/CalendarView.git", requirement: .branch("main"))
+    ],
     targets: [
         .target(
             name: "Avis",
@@ -19,6 +22,10 @@ let project = Project(
 
             resources: [
                 "Avis/**/*.xcassets"
+            ],
+
+            dependencies: [
+                .package(product: "MijickCalendarView")
             ]
         )
     ]
