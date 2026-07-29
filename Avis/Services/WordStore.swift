@@ -1251,4 +1251,16 @@ struct QuizStats: Codable {
         guard totalQuestions > 0 else { return 0 }
         return Double(totalCorrect) / Double(totalQuestions) * 100
     }
+    
+    init() {}
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        totalSessions = try container.decodeIfPresent(Int.self, forKey: .totalSessions) ?? 0
+        totalCorrect = try container.decodeIfPresent(Int.self, forKey: .totalCorrect) ?? 0
+        totalWrong = try container.decodeIfPresent(Int.self, forKey: .totalWrong) ?? 0
+        bestScore = try container.decodeIfPresent(Double.self, forKey: .bestScore) ?? 0
+        lastPlayedDate = try container.decodeIfPresent(Date.self, forKey: .lastPlayedDate)
+        studyDates = try container.decodeIfPresent([String].self, forKey: .studyDates) ?? []
+    }
 }
