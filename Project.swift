@@ -9,7 +9,9 @@ let project = Project(
             product: .app,
             bundleId: "com.example.Avis",
 
-            infoPlist: .default,
+            infoPlist: .extendingDefault(with: [
+                "UILaunchScreen": .dictionary([:])
+            ]),
 
             sources: [
                 "Avis/**/*.swift"
