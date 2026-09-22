@@ -48,52 +48,29 @@ struct HomeView: View {
                         .fontWeight(.bold)
                 }
                 Spacer()
-                ZStack {
-                    Circle()
-                        .stroke(Color(.systemGray5), lineWidth: 8)
-                    Circle()
-                        .trim(from: 0, to: learnedPercent)
-                        .stroke(
-                            LinearGradient(colors: [.indigo, .purple], startPoint: .topLeading, endPoint: .bottomTrailing),
-                            style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                        )
-                        .rotationEffect(.degrees(-90))
-                    Text("\(Int(learnedPercent * 100))%")
-                        .font(.caption)
-                        .fontWeight(.bold)
-                }
-                .frame(width: 64, height: 64)
-                .animation(.easeInOut, value: learnedPercent)
+                CircularProgressView(
+                    progress: learnedPercent,
+                    label: "\(Int(learnedPercent * 100))%"
+                )
             }
             
             HStack(spacing: 12) {
-                statBadge(icon: "checkmark.circle.fill", value: "\(wordListVM.learnedCount)", label: "학습 완료", color: .green)
-                statBadge(icon: "xmark.circle.fill", value: "\(wordListVM.words.filter { $0.wrongCount > 0 }.count)", label: "틀린 단어", color: .red)
-                statBadge(icon: "circle", value: "\(wordListVM.words.count - wordListVM.learnedCount)", label: "미학습", color: .orange)
+                StatBadge(icon: "checkmark.circle.fill", value: "\(wordListVM.learnedCount)", label: "학습 완료", color: .green, showBackground: false)
+                    .padding(.vertical, 10)
+                    .background(Color.green.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                StatBadge(icon: "xmark.circle.fill", value: "\(wordListVM.words.filter { $0.wrongCount > 0 }.count)", label: "틀린 단어", color: .red, showBackground: false)
+                    .padding(.vertical, 10)
+                    .background(Color.red.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                StatBadge(icon: "circle", value: "\(wordListVM.words.count - wordListVM.learnedCount)", label: "미학습", color: .orange, showBackground: false)
+                    .padding(.vertical, 10)
+                    .background(Color.orange.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
         .padding(20)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
-    }
-    
-    private func statBadge(icon: String, value: String, label: String, color: Color) -> some View {
-        VStack(spacing: 4) {
-            Image(systemName: icon)
-                .foregroundColor(color)
-                .font(.title3)
-            Text(value)
-                .font(.title3)
-                .fontWeight(.bold)
-            Text(label)
-                .font(.caption2)
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-        .background(color.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .cardStyle(cornerRadius: 16)
     }
     
     private var quickStartSection: some View {
@@ -198,9 +175,7 @@ struct HomeView: View {
                 .frame(height: 300)
             }
             .padding(16)
-            .background(Color(.systemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
+            .cardStyle(cornerRadius: 16)
         }
     }
     
@@ -224,7 +199,7 @@ struct HomeView: View {
             .background(
                 LinearGradient(colors: gradient, startPoint: .topLeading, endPoint: .bottomTrailing)
             )
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius))
         }
         .buttonStyle(.plain)
     }

@@ -43,16 +43,11 @@ struct WordListView: View {
     }
     
     private var emptyState: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "book.closed")
-                .font(.system(size: 60))
-                .foregroundColor(.indigo.opacity(0.4))
-            Text("단어장이 비어있어요")
-                .font(.headline)
-            Text("홈에서 엑셀 파일을 가져오세요")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
+        EmptyStateView(
+            icon: "book.closed",
+            title: "단어장이 비어있어요",
+            subtitle: "홈에서 엑셀 파일을 가져오세요"
+        )
     }
     
     private var wordList: some View {

@@ -109,14 +109,7 @@ struct QuizView: View {
     }
     
     private func modeBadge(question: QuizQuestion) -> some View {
-        Text(question.promptLabel + " → " + (question.mode == .englishToKorean ? "한글" : "영어"))
-            .font(.caption)
-            .fontWeight(.medium)
-            .foregroundColor(.indigo)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .background(Color.indigo.opacity(0.1))
-            .clipShape(Capsule())
+        BadgeView(text: question.promptLabel + " → " + (question.mode == .englishToKorean ? "한글" : "영어"))
     }
     
     private func questionCard(question: QuizQuestion) -> some View {
@@ -134,11 +127,7 @@ struct QuizView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 180)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.06), radius: 12, y: 4)
-        )
+        .cardStyle(cornerRadius: 20)
     }
     
     private func answerInput(question: QuizQuestion) -> some View {
@@ -170,10 +159,10 @@ struct QuizView: View {
             }
             .padding(16)
             .background(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: AppTheme.cornerRadius)
                     .fill(Color(.systemBackground))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 14)
+                        RoundedRectangle(cornerRadius: AppTheme.cornerRadius)
                             .stroke(inputBorderColor, lineWidth: 2)
                     )
             )
@@ -210,21 +199,14 @@ struct QuizView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     FlowLayout(items: validAnswers) { ans in
-                        Text(ans)
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(Color.green.opacity(0.15))
-                            .foregroundColor(.green)
-                            .clipShape(Capsule())
+                        BadgeView(text: ans, color: .green)
                     }
                 }
             }
         }
         .padding(16)
         .background(
-            RoundedRectangle(cornerRadius: 14)
+            RoundedRectangle(cornerRadius: AppTheme.cornerRadius)
                 .fill(isCorrect ? Color.green.opacity(0.08) : Color.red.opacity(0.08))
         )
         .transition(.asymmetric(insertion: .scale.combined(with: .opacity), removal: .opacity))
@@ -240,33 +222,19 @@ struct QuizView: View {
                         quizVM.skipQuestion()
                         inputFocused = true
                     }
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color(.systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .buttonStyle(SecondaryButtonStyle())
                     
                     Button("확인") {
                         quizVM.submitAnswer(wordListVM: wordListVM)
                     }
                     .disabled(!quizVM.canSubmit)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(quizVM.canSubmit ? Color.indigo : Color(.systemGray4))
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .fontWeight(.semibold)
+                    .buttonStyle(PrimaryButtonStyle(isEnabled: quizVM.canSubmit))
                 } else {
                     Button("다음 문제") {
                         quizVM.nextQuestion()
                         inputFocused = true
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color.indigo)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .fontWeight(.semibold)
+                    .buttonStyle(PrimaryButtonStyle())
                 }
             }
             .padding()
