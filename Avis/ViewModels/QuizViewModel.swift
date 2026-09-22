@@ -37,6 +37,9 @@ class QuizViewModel: ObservableObject {
         
         guard !targetWords.isEmpty else { return }
         
+        quizMode = mode
+        wrongWordsOnly = wrongOnly
+        
         if let limit, targetWords.count > limit {
             targetWords = Array(targetWords.prefix(limit))
         }
