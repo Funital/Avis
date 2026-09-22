@@ -44,8 +44,8 @@ struct QuizView: View {
             }
         }
         .onAppear { inputFocused = true }
-        .onChange(of: quizVM.quizState) { newState in
-            if case .answered(let isCorrect) = newState {
+        .onChange(of: quizVM.quizState) {
+            if case .answered(let isCorrect) = quizVM.quizState {
                 // 1519: 정답(짧은 상승음), 1521: 오답(짧은 하강음)
                 AudioServicesPlaySystemSound(isCorrect ? 1519 : 1521)
             }
