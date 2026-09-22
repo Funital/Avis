@@ -21,7 +21,8 @@ let project = Project(
             ],
 
             resources: [
-                "Avis/**/*.xcassets"
+                "Avis/**/*.xcassets",
+                "Avis/**/*.json"
             ],
 
             dependencies: [
