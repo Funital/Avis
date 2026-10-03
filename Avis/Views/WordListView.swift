@@ -14,17 +14,8 @@ struct WordListView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
-                if wordListVM.words.isEmpty {
-                    emptyState
-                } else {
-                    wordList
-                }
-            }
-            .navigationTitle("단어장")
-            .searchable(text: $wordListVM.searchText, prompt: "영어 또는 한글 검색")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+            VStack(spacing: 0) {
+                TopNavigationTitleBar(title: "단어장") {
                     Menu {
                         Toggle("틀린 단어 우선", isOn: $sortByWrong)
                         Toggle("미학습만 보기", isOn: $showLearnedOnly)
@@ -36,9 +27,22 @@ struct WordListView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
+                            .font(.title3)
+                            .foregroundColor(.indigo)
                     }
                 }
+                
+                Group {
+                    if wordListVM.words.isEmpty {
+                        emptyState
+                    } else {
+                        wordList
+                    }
+                }
+                .searchable(text: $wordListVM.searchText, prompt: "영어 또는 한글 검색")
             }
+            .navigationTitle("단어장")
+            .toolbarVisibility(.hidden, for: .navigationBar)
         }
     }
     

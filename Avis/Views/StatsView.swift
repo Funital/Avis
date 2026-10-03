@@ -7,19 +7,22 @@ struct StatsView: View {
     
     var body: some View {
         NavigationStack {
-            List {
-                // 전체 요약
-                Section("전체 학습 통계") {
-                    StatRow(icon: "play.circle.fill", color: .indigo, title: "총 퀴즈 횟수", value: "\(statsVM.stats.totalSessions)회")
-                    StatRow(icon: "checkmark.circle.fill", color: .green, title: "누적 정답", value: "\(statsVM.stats.totalCorrect)개")
-                    StatRow(icon: "xmark.circle.fill", color: .red, title: "누적 오답", value: "\(statsVM.stats.totalWrong)개")
-                    StatRow(icon: "percent", color: .orange, title: "전체 정확도", value: String(format: "%.1f%%", statsVM.stats.overallAccuracy))
-                    StatRow(icon: "trophy.fill", color: .yellow, title: "최고 점수", value: String(format: "%.0f%%", statsVM.stats.bestScore))
-                    StatRow(icon: "clock.fill", color: .blue, title: "마지막 학습", value: statsVM.formattedLastPlayed)
-                }
+            VStack(spacing: 0) {
+                TopNavigationTitleBar(title: "통계")
                 
-                // 단어장 통계
-                Section("단어장 현황") {
+                List {
+                    // 전체 요약
+                    Section("전체 학습 통계") {
+                        StatRow(icon: "play.circle.fill", color: .indigo, title: "총 퀴즈 횟수", value: "\(statsVM.stats.totalSessions)회")
+                        StatRow(icon: "checkmark.circle.fill", color: .green, title: "누적 정답", value: "\(statsVM.stats.totalCorrect)개")
+                        StatRow(icon: "xmark.circle.fill", color: .red, title: "누적 오답", value: "\(statsVM.stats.totalWrong)개")
+                        StatRow(icon: "percent", color: .orange, title: "전체 정확도", value: String(format: "%.1f%%", statsVM.stats.overallAccuracy))
+                        StatRow(icon: "trophy.fill", color: .yellow, title: "최고 점수", value: String(format: "%.0f%%", statsVM.stats.bestScore))
+                        StatRow(icon: "clock.fill", color: .blue, title: "마지막 학습", value: statsVM.formattedLastPlayed)
+                    }
+                    
+                    // 단어장 통계
+                    Section("단어장 현황") {
                     StatRow(icon: "book.fill", color: .indigo, title: "전체 단어", value: "\(wordListVM.words.count)개")
                     StatRow(icon: "star.fill", color: .green, title: "학습 완료", value: "\(wordListVM.learnedCount)개")
                     StatRow(icon: "exclamationmark.circle.fill", color: .red, title: "오답 단어", value: "\(wordListVM.words.filter { $0.wrongCount > 0 }.count)개")
@@ -54,17 +57,19 @@ struct StatsView: View {
                     }
                 }
                 
-                // 초기화
-                Section {
-                    Button(role: .destructive) {
-                        showResetAlert = true
-                    } label: {
-                        Label("통계 초기화", systemImage: "trash")
+                    // 초기화
+                    Section {
+                        Button(role: .destructive) {
+                            showResetAlert = true
+                        } label: {
+                            Label("통계 초기화", systemImage: "trash")
+                        }
                     }
                 }
+                .listStyle(.insetGrouped)
             }
-            .listStyle(.insetGrouped)
             .navigationTitle("통계")
+            .toolbarVisibility(.hidden, for: .navigationBar)
             .onAppear { statsVM.load() }
             .alert("통계 초기화", isPresented: $showResetAlert) {
                 Button("초기화", role: .destructive) {

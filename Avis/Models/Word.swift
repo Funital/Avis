@@ -14,7 +14,7 @@ struct Word: Identifiable, Codable, Equatable {
         self.korean = korean
         self.isLearned = false
         self.wrongCount = 0
-        self.correctCount = 1
+        self.correctCount = 0
     }
     
     var accuracy: Double {

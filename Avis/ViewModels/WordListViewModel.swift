@@ -107,7 +107,7 @@ class WordListViewModel: ObservableObject {
         if let idx = words.firstIndex(where: { $0.id == wordId }) {
             if isCorrect {
                 words[idx].correctCount += 1
-                if words[idx].correctCount >= 3 {
+                if words[idx].correctCount >= 1 {
                     words[idx].isLearned = true
                 }
             } else {

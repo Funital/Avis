@@ -18,6 +18,8 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    TopNavigationTitleBar(title: "영단어 퀴즈")
+                    
                     // 헤더 카드
                     headerCard
                     
@@ -31,7 +33,7 @@ struct HomeView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("영단어 퀴즈")
-            .navigationBarTitleDisplayMode(.large)
+            .toolbarVisibility(.hidden, for: .navigationBar)
             .onAppear { statsVM.load() }
         }
     }

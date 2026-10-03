@@ -16,69 +16,74 @@ struct QuizSetupView: View {
     
     var body: some View {
         NavigationStack {
-            Form {
-                Section("퀴즈 모드") {
-                    ForEach(QuizMode.allCases, id: \.self) { mode in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(mode.rawValue)
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                Text(modeDescription(mode))
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            if selectedMode == mode {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.indigo)
-                            }
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture { selectedMode = mode }
-                    }
-                }
+            VStack(spacing: 0) {
+                TopNavigationTitleBar(title: "퀴즈 설정")
                 
-                Section("단어 범위") {
-                    Toggle("틀린 단어만", isOn: $wrongWordsOnly)
+                Form {
+                    Section("퀴즈 모드") {
+                        ForEach(QuizMode.allCases, id: \.self) { mode in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(mode.rawValue)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                    Text(modeDescription(mode))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                                if selectedMode == mode {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.indigo)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture { selectedMode = mode }
+                        }
+                    }
                     
-                    HStack {
-                        Text("출제 단어 수")
-                        Spacer()
-                        Text("\(availableWordCount)개")
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                Section {
-                    Button {
-                        quizVM.startQuiz(words: wordListVM.words, mode: selectedMode, wrongOnly: wrongWordsOnly)
-                        navigateToQuiz = true
-                    } label: {
+                    Section("단어 범위") {
+                        Toggle("틀린 단어만", isOn: $wrongWordsOnly)
+                        
                         HStack {
+                            Text("출제 단어 수")
                             Spacer()
-                            Label("퀴즈 시작", systemImage: "play.fill")
-                                .font(.headline)
-                            Spacer()
+                            Text("\(availableWordCount)개")
+                                .foregroundColor(.secondary)
                         }
                     }
-                    .disabled(availableWordCount == 0)
-                    .listRowBackground(availableWordCount > 0 ? Color.indigo : Color.gray)
-                    .foregroundColor(.white)
-                }
-                
-                if availableWordCount == 0 {
+                    
                     Section {
-                        Label(
-                            wrongWordsOnly ? "틀린 단어가 없습니다" : "단어장이 비어있습니다",
-                            systemImage: "exclamationmark.triangle"
-                        )
-                        .foregroundColor(.orange)
-                        .font(.subheadline)
+                        Button {
+                            quizVM.startQuiz(words: wordListVM.words, mode: selectedMode, wrongOnly: wrongWordsOnly)
+                            navigateToQuiz = true
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Label("퀴즈 시작", systemImage: "play.fill")
+                                    .font(.headline)
+                                Spacer()
+                            }
+                        }
+                        .disabled(availableWordCount == 0)
+                        .listRowBackground(availableWordCount > 0 ? Color.indigo : Color.gray)
+                        .foregroundColor(.white)
+                    }
+                    
+                    if availableWordCount == 0 {
+                        Section {
+                            Label(
+                                wrongWordsOnly ? "틀린 단어가 없습니다" : "단어장이 비어있습니다",
+                                systemImage: "exclamationmark.triangle"
+                            )
+                            .foregroundColor(.orange)
+                            .font(.subheadline)
+                        }
                     }
                 }
             }
             .navigationTitle("퀴즈 설정")
+            .toolbarVisibility(.hidden, for: .navigationBar)
             .navigationDestination(isPresented: $navigateToQuiz) {
                 QuizView()
                     .environmentObject(quizVM)
