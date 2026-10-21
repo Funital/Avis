@@ -10,7 +10,7 @@ let project = Project(
             name: "Avis",
             destinations: .iOS,
             product: .app,
-            bundleId: "com.example.Avis",
+            bundleId: "com.avis.app",
 
             infoPlist: .extendingDefault(with: [
                 "UILaunchScreen": .dictionary([:])
