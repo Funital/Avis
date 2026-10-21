@@ -7,6 +7,7 @@ class WordStore {
     private struct DefaultWord: Decodable {
         let english: String
         let korean: String
+        let example: String?
     }
     
     static func save(words: [Word]) {
@@ -43,7 +44,7 @@ class WordStore {
               let entries = try? JSONDecoder().decode([DefaultWord].self, from: data) else {
             return []
         }
-        return entries.map { Word(english: $0.english, korean: $0.korean) }
+        return entries.map { Word(english: $0.english, korean: $0.korean, example: $0.example ?? "") }
     }
 }
 

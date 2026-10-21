@@ -94,6 +94,13 @@ struct WordRowView: View {
                 Text(word.korean)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                if !word.example.isEmpty {
+                    Text(word.example)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .italic()
+                        .lineLimit(2)
+                }
             }
             
             Spacer()

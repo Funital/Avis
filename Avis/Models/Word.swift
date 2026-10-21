@@ -4,17 +4,30 @@ struct Word: Identifiable, Codable, Equatable {
     let id: UUID
     var english: String
     var korean: String
+    var example: String
     var isLearned: Bool
     var wrongCount: Int
     var correctCount: Int
     
-    init(id: UUID = UUID(), english: String, korean: String) {
+    init(id: UUID = UUID(), english: String, korean: String, example: String = "") {
         self.id = id
         self.english = english
         self.korean = korean
+        self.example = example
         self.isLearned = false
         self.wrongCount = 0
         self.correctCount = 0
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        english = try container.decode(String.self, forKey: .english)
+        korean = try container.decode(String.self, forKey: .korean)
+        example = try container.decodeIfPresent(String.self, forKey: .example) ?? ""
+        isLearned = try container.decode(Bool.self, forKey: .isLearned)
+        wrongCount = try container.decode(Int.self, forKey: .wrongCount)
+        correctCount = try container.decode(Int.self, forKey: .correctCount)
     }
     
     var accuracy: Double {
